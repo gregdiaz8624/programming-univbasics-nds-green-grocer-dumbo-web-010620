@@ -1,36 +1,40 @@
-def find_item_by_name_in_collection(name, collection)
-  # Implement me first!
-  #
-  # Consult README for inputs and outputs
+def consolidate_cart(cart:[])
+	cart.each_with_object({}) do |item, consolidated|
+		item_name = item.keys.first
+		if consolidated[item_name]
+			consolidated[item_name][:count] += 1
+		else
+			consolidated[item_name] = {
+				price: item[item_name][:price],
+				clearance: item[item_name][:clearance],
+				count: 1
+			}
+		end
+	end
 end
 
-def consolidate_cart(cart)
-  # Consult README for inputs and outputs
-  #
-  # REMEMBER: This returns a new Array that represents the cart. Don't merely
-  # change `cart` (i.e. mutate) it. It's easier to return a new thing.
-end
+def checkout(cart: [], coupons: [])
+	new_cart = consolidate_cart(cart: cart)
+	total = 0
+	new_cart.each_pair do |item, properties|
+		sub_total = 0
+		if coupon = coupons.find {|coupon| coupon[:item] == item }
+			if coupon[:num] <= properties[:count]
+				properties[:count] -= coupon[:num]
+				sub_total += coupon[:cost]
+			end
+		end
 
-def apply_coupons(cart, coupons)
-  # Consult README for inputs and outputs
-  #
-  # REMEMBER: This method **should** update cart
-end
+		sub_total += properties[:price] * properties[:count]
+		if properties[:clearance]
+			sub_total = sub_total - (sub_total * 0.20)
+		end
 
-def apply_clearance(cart)
-  # Consult README for inputs and outputs
-  #
-  # REMEMBER: This method **should** update cart
-end
+		if sub_total > 100
+			sub_total = sub_total - (sub_total * 0.10)
+		end
 
-def checkout(cart, coupons)
-  # Consult README for inputs and outputs
-  #
-  # This method should call
-  # * consolidate_cart
-  # * apply_coupons
-  # * apply_clearance
-  #
-  # BEFORE it begins the work of calculating the total (or else you might have
-  # some irritated customers
+		total += sub_total
+	end
+	total
 end
